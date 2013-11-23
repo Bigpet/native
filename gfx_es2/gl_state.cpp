@@ -4,9 +4,6 @@
 #include "base/NativeApp.h"
 #include "gl_state.h"
 
-#ifdef _WIN32
-#include "GL/wglew.h"
-#endif
 
 #if defined(USING_GLES2)
 #if defined(ANDROID) || defined(BLACKBERRY)
@@ -22,6 +19,8 @@ PFNGLBINDVERTEXARRAYOESPROC glBindVertexArrayOES;
 PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArraysOES;
 PFNGLISVERTEXARRAYOESPROC glIsVertexArrayOES;
 #endif
+#elif defined(_WIN32)
+#include "GL/wglew.h"
 #endif
 
 OpenGLState glstate;
@@ -182,20 +181,7 @@ void CheckGLExtensions() {
 		g_all_gl_extensions = "";
 	}
 
-#ifdef WIN32
-	const char *wglString = 0;
-	if (wglGetExtensionsStringEXT)
-		wglString = wglGetExtensionsStringEXT();
-	if (wglString) {
-		gl_extensions.EXT_swap_control_tear = strstr(wglString, "WGL_EXT_swap_control_tear") != 0;
-		g_all_egl_extensions = wglString;
-	} else {
-		g_all_egl_extensions = "";
-	}
-#elif !defined(USING_GLES2)
-	// const char *glXString = glXQueryExtensionString();
-	// gl_extensions.EXT_swap_control_tear = strstr(glXString, "GLX_EXT_swap_control_tear") != 0;
-#endif
+
 
 #ifdef USING_GLES2
 	gl_extensions.OES_packed_depth_stencil = strstr(extString, "GL_OES_packed_depth_stencil") != 0;
@@ -237,7 +223,21 @@ void CheckGLExtensions() {
 	gl_extensions.OES_vertex_array_object = false;
 	gl_extensions.EXT_discard_framebuffer = false;
 #endif
-#else
+#elif defined(WIN32)
+	const char *wglString = 0;
+	if (wglGetExtensionsStringEXT)
+		wglString = wglGetExtensionsStringEXT();
+	if (wglString) {
+		gl_extensions.EXT_swap_control_tear = strstr(wglString, "WGL_EXT_swap_control_tear") != 0;
+		g_all_egl_extensions = wglString;
+	}
+	else {
+		g_all_egl_extensions = "";
+	}
+#else 
+	// const char *glXString = glXQueryExtensionString();
+	// gl_extensions.EXT_swap_control_tear = strstr(glXString, "GLX_EXT_swap_control_tear") != 0;
+
 	// Desktops support minmax and subimage unpack (GL_UNPACK_ROW_LENGTH etc)
 	gl_extensions.EXT_blend_minmax = true;
 	gl_extensions.EXT_unpack_subimage = true;
@@ -291,7 +291,7 @@ void CheckGLExtensions() {
 }
 
 void OpenGLState::SetVSyncInterval(int interval) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(USING_GLES2)
 	if (wglSwapIntervalEXT)
 		wglSwapIntervalEXT(interval);
 #endif

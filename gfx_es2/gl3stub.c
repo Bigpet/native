@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#if !defined(IOS) && !defined(__SYMBIAN32__) && !defined(MEEGO_EDITION_HARMATTAN) && !defined(MAEMO)
+#if !defined(IOS) && !defined(__SYMBIAN32__) && !defined(MEEGO_EDITION_HARMATTAN) && !defined(MAEMO) && !defined(_WIN32)
 
 #include "../gfx/gl_common.h"
 

@@ -6,6 +6,10 @@
 #include "math/geom2d.h"
 #include "gfx/texture_atlas.h"
 
+#ifdef  DrawText
+#undef  DrawText
+#endif
+
 // Everything you need to draw a UI collected into a single unit that can be passed around.
 // Everything forward declared so this header is safe everywhere.
 

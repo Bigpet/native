@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #include <shlobj.h>
 #include <shlwapi.h>
@@ -32,7 +33,7 @@
 #include "util/const_map.h"
 #include "math/math_util.h"
 #include "../SDL/SDLJoystick.h"
-
+#include "util/text/utf8.h"
 
 GlobalUIState lastUIState = UISTATE_MENU;
 
@@ -181,7 +182,8 @@ SDLJoystick *joystick;
 
 void SystemToast(const char *text) {
 #ifdef _WIN32
-	MessageBox(0, text, "Toast!", MB_ICONINFORMATION);
+	std::wstring wtext = ConvertUTF8ToWString(std::string(text));
+	MessageBox(0, wtext.c_str(), L"Toast!", MB_ICONINFORMATION);
 #else
 	puts(text);
 #endif
@@ -207,7 +209,8 @@ void System_InputBox(const char *title, const char *defaultValue) {
 void LaunchBrowser(const char *url)
 {
 #ifdef _WIN32
-	ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+	std::wstring wurl = ConvertUTF8ToWString(url);
+	ShellExecute(NULL, L"open", wurl.c_str(), NULL, NULL, SW_SHOWNORMAL);
 #elif __linux__
 	std::string command = std::string("xdg-open ") + url;
 	system(command.c_str());
@@ -222,7 +225,8 @@ void LaunchBrowser(const char *url)
 void LaunchMarket(const char *url)
 {
 #ifdef _WIN32
-	ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+	std::wstring wurl = ConvertUTF8ToWString(url);
+	ShellExecute(NULL, L"open", wurl.c_str(), NULL, NULL, SW_SHOWNORMAL);
 #elif __linux__
 	std::string command = std::string("xdg-open ") + url;
 	system(command.c_str());
@@ -237,7 +241,8 @@ void LaunchMarket(const char *url)
 void LaunchEmail(const char *email_address)
 {
 #ifdef _WIN32
-	ShellExecute(NULL, "open", (std::string("mailto:") + email_address).c_str(), NULL, NULL, SW_SHOWNORMAL);
+	std::wstring wemail_address = ConvertUTF8ToWString(std::string(email_address));
+	ShellExecute(NULL, L"open", (std::wstring(L"mailto:") + wemail_address).c_str(), NULL, NULL, SW_SHOWNORMAL);
 #elif __linux__
 	std::string command = std::string("xdg-email ") + email_address;
 	system(command.c_str());
@@ -381,7 +386,7 @@ int main(int argc, char *argv[]) {
 	// VFSRegister("temp/", new DirectoryAssetReader("E:\\Temp\\"));
 	TCHAR path[MAX_PATH];
 	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path);
-	PathAppend(path, (app_name + "\\").c_str());
+	PathAppend(path, (ConvertUTF8ToWString(app_name) + L"\\").c_str());
 #else
 	// Mac / Linux
 	char path[512];
@@ -397,7 +402,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef _WIN32
-	NativeInit(argc, (const char **)argv, path, "D:\\", "BADCOFFEE");
+	NativeInit(argc, (const char **)argv, ConvertWStringToUTF8(path).c_str(), "D:\\", "BADCOFFEE");
 #else
 	NativeInit(argc, (const char **)argv, path, "/tmp", "BADCOFFEE");
 #endif
@@ -580,7 +585,7 @@ int main(int argc, char *argv[]) {
 				}
 				break;
 			default:
-				joystick->processInput(ev)
+				joystick->ProcessInput(event);
 			}
 		}
 

@@ -16,6 +16,10 @@
 #include "gfx/gl_common.h"
 #include "util/text/utf8.h"
 
+#ifdef DrawText
+#undef DrawText
+#endif
+
 enum {
 	// Enough?
 	MAX_VERTS = 65536,
