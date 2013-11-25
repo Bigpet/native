@@ -3,6 +3,7 @@
 #include "base/logging.h"
 #include "base/NativeApp.h"
 #include "gl_state.h"
+extern EGLDisplay disp;
 
 
 #if defined(USING_GLES2)
@@ -291,7 +292,9 @@ void CheckGLExtensions() {
 }
 
 void OpenGLState::SetVSyncInterval(int interval) {
-#if defined(_WIN32) && !defined(USING_GLES2)
+#if defined(USING_GLES2)
+	eglSwapInterval(disp,interval);
+#elif defined(_WIN32)
 	if (wglSwapIntervalEXT)
 		wglSwapIntervalEXT(interval);
 #endif
