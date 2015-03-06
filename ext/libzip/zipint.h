@@ -36,11 +36,13 @@
 
 #include <zlib.h>
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER 
 #define ZIP_EXTERN
 #define fseeko fseek
 #define ftello ftell
+#if _MSC_VER < 1900 
 #define snprintf _snprintf
+#endif
 #ifndef strcasecmp
 #define strcasecmp _stricmp
 #endif
